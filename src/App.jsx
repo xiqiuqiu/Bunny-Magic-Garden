@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { LucideSettings } from 'lucide-react';
@@ -11,6 +11,7 @@ import { SettingsModal } from './components/SettingsModal';
 // Services
 import { generateRiddle, generateSpeech } from './services/apiService';
 import { playSound, getAudioContext } from './services/audioService';
+import { loadApiConfig, saveApiConfig } from './services/storageService';
 
 /**
  * JellyGarden - 拔萝卜游戏主应用组件
@@ -35,11 +36,20 @@ export default function App() {
   // 设置弹窗状态
   const [showSettings, setShowSettings] = useState(false);
   // API 配置
-  const [apiConfig, setApiConfig] = useState({
-    provider: 'google', // 'google' | 'qwen'
-    googleKey: "",
-    qwenKey: ""
+  const [apiConfig, setApiConfig] = useState(() => {
+    // 初始化时从 localStorage 读取配置
+    const saved = loadApiConfig();
+    return saved || {
+      provider: 'google', // 'google' | 'qwen'
+      googleKey: "",
+      qwenKey: ""
+    };
   });
+
+  // 当配置变化时保存到 localStorage
+  useEffect(() => {
+    saveApiConfig(apiConfig);
+  }, [apiConfig]);
 
   // 可选颜色
   const colorOptions = ['red', 'blue', 'yellow', 'purple'];
